@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Todo } from "../models/Todos";
 import { Op, Sequelize } from "sequelize";
+import { off } from "process";
 
 export const todo = async (req: Request, res: Response) => {
     let allTasks = await Todo.findAll();
@@ -44,9 +45,20 @@ export const changeTaks = async (req: Request, res: Response) => {
     let task = await Todo.findByPk(id);
 
     if (task) {
-        task.title = title;
-        task.done = done;
-
+        if(title) {
+            task.title = title;
+        }
+        
+        if(done) {
+            if(done.toLowerCase() === 'true') {
+                task.done = true
+            } else if (done.toLowerCase() === 'false') {
+                task.done = false
+            } else {
+                res.json({erro: 'Só podem ser enviados valores booleanos'})
+            }
+        }
+        
         await task.save();
 
         res.status(200);
